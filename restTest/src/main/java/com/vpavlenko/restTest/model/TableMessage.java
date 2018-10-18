@@ -2,16 +2,16 @@ package com.vpavlenko.restTest.model;
 
 import javax.persistence.*;
 
-@Table(name = "TableMessage", schema = "restMessage")
+@Table(name = "table_message", schema = "restMessage")
 @Entity
 public class TableMessage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "MESSAGE")
+    @Column(name = "text")
     private String text;
-    @Column(name = "orderNumber")
+    @Column(name = "order_number")
     private int orderNumber;
 
     public Long getId() {

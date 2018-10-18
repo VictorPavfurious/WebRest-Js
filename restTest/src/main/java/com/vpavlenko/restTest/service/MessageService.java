@@ -10,8 +10,8 @@ public interface MessageService {
     Optional<List<TableMessage>> getAll();
     TableMessage getMessageById(Long id);
     void deleteMessage(Long id);
-    void updateMessage(TableMessage message);
-    void saveMessage(TableMessage message);
-    void addMessage(TableMessage message);
+    TableMessage updateMessage(TableMessage message);
+    TableMessage addMessage(TableMessage message);
+    TableMessage getMessageByOrderNumber(int orderNumber);
 
 }

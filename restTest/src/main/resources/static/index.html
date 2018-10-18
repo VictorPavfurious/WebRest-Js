@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.2.1.js"></script>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+    table tr {
+        cursor: pointer;transition: all .25s ease-in-out;
+    } table tr:hover{background-color: #dddddd;}
+    </style>
+</head>
+<body>
+<h1> Hello </h1>
+<div class="action">
+<input type="text" id="current" />
+
+    <div class="buttons">
+    <button id="add" onclick="addEntity(this)">Add</button>
+    <button id="delete" onclick="deleteEntity()">Delete</button>
+    <button id="update" onclick="updateEntity()">Update</button>
+    <button id="up" onclick="updateEntityUp()">Up</button>
+    <button id="down" onclick="updateEntityDown()">Down</button>
+    </div>
+
+    <table id="table" border="1">
+
+    </table>
+
+</div>
+<script>
+
+    function deleteEntity(id) {
+        $.ajax({
+            url: "/api/v1/entity",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            method:"DELETE",
+            data: JSON.stringify({"id": id}),
+            dataType: "json"
+        })
+    }
+    function getEntities() {
+        $.ajax({
+            url: "/api/v1/entity/list"
+        }).done(function(data) {
+            $("#table tbody").empty();
+            $.each(data, function (index, item) {
+                $("#table").append("<tr class='del'> <td onclick='setInput(this)'> "+item.text+ " " +item.orderNumber+" </td> </tr>");
+            });
+        });
+    }
+
+    function setInput(obj) {
+        $("#current").val(obj.innerHTML);
+    }
+
+    function addEntity(obj) {
+        $.ajax({
+            url: "/api/v1/entity",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            method:"POST",
+            data: JSON.stringify({"text": obj.innerHTML, "orderNumber": 3}),
+            dataType: "json"
+        });
+    }
+
+    function updateEntity(obj) {
+        $.ajax({
+            url: "/api/v1/entity",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            method:"PATCH",
+            data: JSON.stringify({"text": obj.innerHTML, "orderNumber": 3, "id": id, "type": ""}),
+            dataType: "json"
+        });
+    }
+
+    function updateEntityDown() {
+        $.ajax({
+            url: "/api/v1/entity",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            method:"PATCH",
+            data: JSON.stringify({"text": "some textttupdate", "orderNumber": 4, "id": 1, "type": ""}),
+            dataType: "json"
+
+        });
+    }
+    function updateEntityUp() {
+        $.ajax({
+            url: "/api/v1/entity",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            method:"PATCH",
+            data: JSON.stringify({"text": "some textttupdate", "orderNumber": 2, "id": 1, "type": ""}),
+            dataType: "json"
+
+        });
+    }
+    $( document ).ajaxSuccess(function( event, xhr, settings ) {
+
+        console.log(settings);
+        if (settings.url === "/api/v1/entity") {
+            getEntities();
+        }
+    }
+    );
+    getEntities();
+</script>
+</body>
+</html>

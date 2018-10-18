@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 public interface MessageDao extends JpaRepository<TableMessage, Long> {
 
 
+    TableMessage getByOrderNumber(int orderNumber);
 }

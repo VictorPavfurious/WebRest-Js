@@ -23,26 +23,27 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public TableMessage getMessageById(Long id)
     {
-        return null;
+        return messageDao.getOne(id);
     }
 
     @Override
     public void deleteMessage(Long id) {
+        messageDao.deleteById(id);
+    }
 
+
+    @Override
+    public TableMessage updateMessage(TableMessage message) {
+        return messageDao.save(message);
     }
 
     @Override
-    public void updateMessage(TableMessage message) {
-
+    public TableMessage addMessage(TableMessage message) {
+        return messageDao.save(message);
     }
 
     @Override
-    public void saveMessage(TableMessage message) {
-
-    }
-
-    @Override
-    public void addMessage(TableMessage message) {
-
+    public TableMessage getMessageByOrderNumber(int orderNumber) {
+        return messageDao.getByOrderNumber(orderNumber);
     }
 }
