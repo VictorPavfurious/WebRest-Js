@@ -3,6 +3,7 @@ package com.vpavlenko.restTest.service;
 import com.vpavlenko.restTest.messagedao.MessageDao;
 import com.vpavlenko.restTest.model.TableMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,17 +18,18 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public Optional<List<TableMessage>> getAll() {
 
-        return Optional.ofNullable(messageDao.findAll());
+
+        return Optional.ofNullable(messageDao.findAll(sortByOrderNumberAsc()));
     }
 
     @Override
-    public TableMessage getMessageById(Long id)
+    public TableMessage getMessageById(int id)
     {
         return messageDao.getOne(id);
     }
 
     @Override
-    public void deleteMessage(Long id) {
+    public void deleteMessage(int id) {
         messageDao.deleteById(id);
     }
 
@@ -42,8 +44,8 @@ public class MessageServiceImpl implements MessageService {
         return messageDao.save(message);
     }
 
-    @Override
-    public TableMessage getMessageByOrderNumber(int orderNumber) {
-        return messageDao.getByOrderNumber(orderNumber);
+        @Override
+    public Sort sortByOrderNumberAsc() {
+        return new Sort(Sort.Direction.ASC, "orderNumber");
     }
 }

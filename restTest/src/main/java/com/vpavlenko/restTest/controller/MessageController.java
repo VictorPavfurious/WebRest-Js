@@ -2,15 +2,13 @@ package com.vpavlenko.restTest.controller;
 
 import com.vpavlenko.restTest.model.TableMessage;
 import com.vpavlenko.restTest.service.MessageService;
+import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @RestController
 public class MessageController {
@@ -42,34 +40,35 @@ public class MessageController {
     @ResponseBody
     @ResponseStatus( HttpStatus.OK )
     public ResponseEntity<Void> deleteMessage(@RequestBody TableMessage tableMessage) {
-       try {
+        try {
             messageService.deleteMessage(tableMessage.getId());
-       return ResponseEntity.noContent().build();
-       }
-           catch (Exception e) {
-               return ResponseEntity.notFound().build();
-           }
-
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @RequestMapping(value = "/api/v1/entity", method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public TableMessage updateMessage(@RequestBody TableMessage tableMessage)
+    public ResponseEntity<Object> updateMessage(@RequestBody JSONObject payload)
     {
-         TableMessage currentMessage = messageService.getMessageById(tableMessage.getId());
-//         int current = currentMessage.getOrderNumber();
-//         int change = tableMessage.getOrderNumber();
-//        if(current > change) {
-//
-//            TableMessage tableMessage1 = messageService.getMessageByOrderNumber(change);
-//            tableMessage1.setOrderNumber(current);
-//            messageService.updateMessage(tableMessage1);
-//         } else if (current < change) {
-//             TableMessage tableMessage1 = messageService.getMessageByOrderNumber(current);
-//             tableMessage1.setOrderNumber(change);
-//             messageService.updateMessage(tableMessage1);
-//         }
 
-        return messageService.updateMessage(tableMessage);
+        String text = payload.getAsString("text");
+        TableMessage currentMessage = messageService.getMessageById(payload.getAsNumber("id").intValue());
+        try {
+            int change = payload.getAsNumber("change").intValue();
+            if (change > 0) {
+                TableMessage prevMessage = messageService.getMessageById(payload.getAsNumber("change").intValue());
+                int temp = currentMessage.getOrderNumber();
+                currentMessage.setOrderNumber(prevMessage.getOrderNumber());
+                prevMessage.setOrderNumber(temp);
+                messageService.updateMessage(prevMessage);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        currentMessage.setText(text);
+        messageService.updateMessage(currentMessage);
+        return ResponseEntity.noContent().build();
     }
 
     @RequestMapping (value = "/api/v1/entity", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)

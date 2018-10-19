@@ -13,14 +13,14 @@
 <body>
 <h1> Hello </h1>
 <div class="action">
-<input type="text" id="current" />
+<input type="text" id="current" data=""/>
 
+    <button id="add" onclick="addEntity()">Add</button>
     <div class="buttons">
-    <button id="add" onclick="addEntity(this)">Add</button>
     <button id="delete" onclick="deleteEntity()">Delete</button>
     <button id="update" onclick="updateEntity()">Update</button>
-    <button id="up" onclick="updateEntityUp()">Up</button>
-    <button id="down" onclick="updateEntityDown()">Down</button>
+    <button id="up" onclick="upEntity()">Up</button>
+    <button id="down" onclick="downEntity()">Down</button>
     </div>
 
     <table id="table" border="1">
@@ -30,7 +30,8 @@
 </div>
 <script>
 
-    function deleteEntity(id) {
+    function deleteEntity() {
+        var id = $("#current").attr("data-id");
         $.ajax({
             url: "/api/v1/entity",
             headers: {
@@ -39,7 +40,7 @@
             method:"DELETE",
             data: JSON.stringify({"id": id}),
             dataType: "json"
-        })
+        });
     }
     function getEntities() {
         $.ajax({
@@ -47,55 +48,45 @@
         }).done(function(data) {
             $("#table tbody").empty();
             $.each(data, function (index, item) {
-                $("#table").append("<tr class='del'> <td onclick='setInput(this)'> "+item.text+ " " +item.orderNumber+" </td> </tr>");
+                $("#table").append(`<tr data-order="${item.orderNumber}" data-id="${item.id}"><td onclick='setInput("${item.id}", "${item.text}", "${item.orderNumber}")'>${item.text}</td></tr>`);
             });
         });
     }
 
-    function setInput(obj) {
-        $("#current").val(obj.innerHTML);
+    function setInput(id, text, order) {
+          $("#current").val(text);
+          $("#current").attr("data-id", id);
+          $("#current").attr("data-order", order);
+          if (text != '') {
+              $(".buttons").show();
+          }
     }
 
-    function addEntity(obj) {
-        $.ajax({
-            url: "/api/v1/entity",
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            method:"POST",
-            data: JSON.stringify({"text": obj.innerHTML, "orderNumber": 3}),
-            dataType: "json"
-        });
+    function addEntity() {
+        var input = $("#current").val();
+        if (input != '') {
+            var order = parseInt($( "tr" ).last().attr("data-order"));
+            order = order + 1;
+            $.ajax({
+                url: "/api/v1/entity",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                method:"POST",
+                data: JSON.stringify({"text": input, "orderNumber": order}),
+                dataType: "json"
+            });
+            setInput("","","");
+            $(".buttons").hide();
+        }
+
     }
 
-    function updateEntity(obj) {
-        $.ajax({
-            url: "/api/v1/entity",
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            method:"PATCH",
-            data: JSON.stringify({"text": obj.innerHTML, "orderNumber": 3, "id": id, "type": ""}),
-            dataType: "json"
-        });
-    }
-
-    function updateEntityDown() {
-        $.ajax({
-            url: "/api/v1/entity",
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            method:"PATCH",
-            data: JSON.stringify({"text": "some textttupdate", "orderNumber": 4, "id": 1, "type": ""}),
-            dataType: "json"
-
-        });
-    }
-    function updateEntityUp() {
+    function updateEntity() {
+        var text = $("#current").val();
+        var id = $("#current").attr("data-id");
+        var order = $("#current").attr("data-order");
         $.ajax({
             url: "/api/v1/entity",
             headers: {
@@ -103,19 +94,51 @@
                 'Content-Type': 'application/json'
             },
             method:"PATCH",
-            data: JSON.stringify({"text": "some textttupdate", "orderNumber": 2, "id": 1, "type": ""}),
+            data: JSON.stringify({"text": text, "orderNumber": order, "id": id, "change": 0}),
             dataType: "json"
-
         });
     }
+    function upEntity() {
+        var text = $("#current").val();
+        var id = $("#current").attr("data-id");
+        var change = $(`tr[data-id="${id}"]`).prev().attr('data-id');
+        var order = $("#current").attr("data-order");
+        $.ajax({
+            url: "/api/v1/entity",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            method:"PATCH",
+            data: JSON.stringify({"text": text, "orderNumber": order, "id": id, "change": change}),
+            dataType: "json"
+        });
+    }
+    function downEntity() {
+        var text = $("#current").val();
+        var id = $("#current").attr("data-id");
+        var change = $(`tr[data-id="${id}"]`).next().attr('data-id');
+        var order = $("#current").attr("data-order");
+        $.ajax({
+            url: "/api/v1/entity",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            method:"PATCH",
+            data: JSON.stringify({"text": text, "orderNumber": order, "id": id, "change": change}),
+            dataType: "json"
+        });
+    }
+
+
     $( document ).ajaxSuccess(function( event, xhr, settings ) {
-
-        console.log(settings);
         if (settings.url === "/api/v1/entity") {
             getEntities();
         }
     }
     );
+    $(".buttons").hide();
     getEntities();
 </script>
 </body>
